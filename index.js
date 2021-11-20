@@ -23,20 +23,6 @@ const mainMenu = (environment) => {
 	inquirer
 		.prompt([
 			{
-				type: 'input',
-				name: 'environmentConfirm',
-				message: `PLEASE READ:\nAll changes made will impact the ${environment.toUpperCase()} database. To show you understand and intend to update the ${environment.toUpperCase()} database, please type '${environment}' and press enter.`,
-				validate: (input) => {
-					if (input.length === 0) {
-						return "Type the environment name to proceed, or press 'Ctrl + C' to end the script"
-					} else if (input !== environment) {
-						return "Input does not match environment name. Please type the exact environment name, or press 'Ctrl + C' to end the script with no changes made."
-					} else {
-						return true
-					}
-				},
-			},
-			{
 				type: 'rawlist',
 				name: 'menuAction',
 				message: `What would you like to do?`,
@@ -169,9 +155,12 @@ const importCardsFromFile = () => {
 			.pipe(csvParser())
 			.on('data', (row) => {
 				//Checks that there are correct number of properties for row (6). If not, pushes to invalid array
+				console.log(row)
 				if (checkEmptyProperties(row)) {
+					console.log("invalid")
 					invalidCards.push(row['0'])
 				} else {
+					console.log("valid")
 					validCards.push(row)
 				}
 			})
@@ -344,10 +333,29 @@ const removeCardFromDeck = () => {
 
 const deleteDeck = () => {
 	console.log('delete deck')
+	db.collection('cards').remove()
 }
 
 const logExistingCards = () => {
 	console.log('log existing cards')
+	const dbQuery = db.collection('cards')
+
+	dbQuery.get().then((cardsFromDB) => {
+		const cards = []
+		cardsFromDB.forEach((card) => {
+			const tabooList = card.data().tabooList
+			cards.push({
+				tabooWord: card.id,
+				tabooList,
+			})
+			console.log(card.id + "," + tabooList[0] + "," + tabooList[1] + "," + tabooList[2] + "," + tabooList[3] + "," + tabooList[4])
+		})
+		console.log(cards.length + " cards total")
+		mainMenu(process.env.NODE_ENV)
+	})
+	.catch((err) => {
+		console.log(err.message)
+	})
 }
 
 const determineSuggestionType = () => {

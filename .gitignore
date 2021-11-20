@@ -20,9 +20,11 @@
 .env.production.local
 
 /docs
-/deck
 /keys
 
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+// Local config
+tabulator-cc54b-firebase-adminsdk*
